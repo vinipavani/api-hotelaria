@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # --------------------------------------------------------
+  # SERVIÇO DO BANCO DE DADOS
+  # --------------------------------------------------------
+  db:
+    image: postgres:17-alpine
+    container_name: api_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: api_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # --------------------------------------------------------
+  # SERVIÇO DA API 
+  # --------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: api_go
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
