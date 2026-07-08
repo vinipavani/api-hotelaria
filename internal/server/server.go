@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 	"api-hotelaria/internal/config"
-	"://github.com"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Server struct {
