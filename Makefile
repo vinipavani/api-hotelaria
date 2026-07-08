@@ -1,18 +1,18 @@
 run:
-	docker-compose up --build
+	docker compose up --build
 
 stop:
-	docker-compose down
+	docker compose down
 
 setup:
-	docker-compose up -d db api
+	docker compose up -d db api
 	sleep 3
-	docker-compose exec api go mod init api-hotelaria || true
-	docker-compose exec api go get ://github.com
-	docker-compose exec api air init || true
-	docker-compose down
+	docker compose exec api go mod init api-hotelaria || true
+	docker compose exec api go get ://github.com
+	docker compose exec api air init || true
+	docker compose down
 	@echo "🚀 Setup concluído com sucesso! Agora basta rodar 'make run' para iniciar."
 
 .PHONY: clean - clear database and remove containers
 clean:
-	docker-compose down -v
+	docker compose down -v
