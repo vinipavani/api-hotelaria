@@ -3,15 +3,13 @@ package database
 import (
 	"context"
 	"log"
-	"os"
 	"time"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"api-hotelaria/internal/config"
 )
 
 func ConnectDB() {
-	databaseURL := getDatabaseURL()
-
-	config, err := pgxpool.ParseConfig(databaseURL)
+	config, err := pgxpool.ParseConfig(config.Env.DatabaseURL)
 	if err != nil {
 		log.Fatalf("Erro ao processar a string de conexão do banco: %v\n", err)
 	}
@@ -36,15 +34,6 @@ func CloseDB() {
 		DB.Close()
 		log.Println("Pool de conexões com o banco de dados fechado com sucesso.")
 	}
-}
-
-func getDatabaseURL() string {
-	databaseURL := os.Getenv("DATABASE_URL")
-	if databaseURL == "" {
-		databaseURL = "postgres://postgres:postgres@db:5432/api_db?sslmode=disable"
-	}
-
-	return databaseURL
 }
 
 func configDatabaseConnection(config *pgxpool.Config) *pgxpool.Config {
