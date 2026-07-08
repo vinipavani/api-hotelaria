@@ -8,6 +8,8 @@ import (
 	"api-hotelaria/internal/config"
 )
 
+var DB *pgxpool.Pool
+
 func ConnectDB() {
 	config, err := pgxpool.ParseConfig(config.Env.DatabaseURL)
 	if err != nil {
