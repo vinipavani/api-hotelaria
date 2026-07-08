@@ -1,1 +1,15 @@
 .env
+*.env
+.env.*
+!.env.example
+
+tmp/
+build-errors.log
+
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+.vscode/
