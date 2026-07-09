@@ -16,6 +16,10 @@ func NewService(repository *Repository) *Service {
 	}
 }
 
+func (s *Service) findAllHotels(ctx context.Context) ([]*Hotel, error) {
+	return s.repo.FindAll(ctx)
+}
+
 func (s *Service) CreateHotel(ctx context.Context, input CreateHotelInput) (*Hotel, error) {
 	newHotel, err := validateParams(input.Name, input.City)
 	if err != nil {

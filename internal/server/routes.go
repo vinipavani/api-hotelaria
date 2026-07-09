@@ -13,6 +13,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	hotelService := hotel.NewService(hotelRepo)
 	hotelHandler := hotel.NewHandler(hotelService)
 
+	router.GET("/hotels", hotelHandler.List)
 	router.POST("/hotels", hotelHandler.Create)
 
 	return router

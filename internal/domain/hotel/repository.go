@@ -3,6 +3,7 @@ package hotel
 import (
 	"context"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
 )
 
 type Repository struct {
@@ -13,6 +14,45 @@ func NewRepository(database *pgxpool.Pool) *Repository {
 	return &Repository{
 		db: database,
 	}
+}
+
+func (r *Repository) FindAll(ctx context.Context) ([]*Hotel, error) {
+	query := `
+		SELECT id, name, city, created_at 
+		FROM hotels 
+		ORDER BY id ASC;
+	`
+
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var hotels []*Hotel
+	hotels, err = buildList(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return hotels, nil
+}
+
+func buildList(dbRows pgx.Rows) ([]*Hotel, error) {
+	hotels := []*Hotel{}
+
+	for dbRows.Next() {
+		var h Hotel
+
+		err := dbRows.Scan(&h.ID, &h.Name, &h.City, &h.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		hotels = append(hotels, &h)
+	}
+
+	return hotels, nil
 }
 
 func (r *Repository) Insert(ctx context.Context, h *Hotel) error {

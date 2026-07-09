@@ -15,6 +15,19 @@ func NewHandler(s *Service) *Handler {
 	return &Handler{service: s}
 }
 
+func (h *Handler) List(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	hotels, err := h.service.findAllHotels(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar hotéis: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, hotels)
+}
+
 func (h *Handler) Create(c *gin.Context) {
 	var input CreateHotelInput
 	if err := c.ShouldBindJSON(&input); err != nil {
