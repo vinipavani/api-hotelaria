@@ -22,6 +22,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	roomHandler := room.NewHandler(roomService)
 
 	router.POST("/hotels/:id/rooms", roomHandler.Create)
+	router.GET("/hotels/:id/rooms", roomHandler.List)
 
 	return router
 }

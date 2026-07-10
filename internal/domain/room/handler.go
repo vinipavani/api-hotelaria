@@ -16,6 +16,21 @@ func NewHandler(s *Service) *Handler {
 	return &Handler{service: s}
 }
 
+func (h *Handler) List(c *gin.Context) {
+	hotelID := c.Param("id")
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	rooms, err := h.service.findAllRooms(ctx, hotelID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao listar os quartos: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, rooms)
+}
+
 func (h *Handler) Create(c *gin.Context) { 
 	hotelID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

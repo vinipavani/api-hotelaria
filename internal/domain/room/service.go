@@ -15,6 +15,15 @@ func NewService(repository *Repository) *Service {
 	}
 }
 
+func (s *Service) findAllRooms(ctx context.Context, hotelID string) ([]*Room, error) {
+	rooms, err := s.repo.FindAll(ctx, hotelID)
+	if err != nil {
+		return nil, err
+	}
+	
+	return rooms, nil
+}
+
 func (s *Service) CreateRoom(ctx context.Context, input CreateRoomInput) (*Room, error) {
 	newRoom, err := validateParams(input.HotelID, input.Type, input.Capacity, input.PerNightValue)
 	if err != nil {
