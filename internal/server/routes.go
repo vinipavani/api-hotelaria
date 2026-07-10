@@ -21,7 +21,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	roomService := room.NewService(roomRepo)
 	roomHandler := room.NewHandler(roomService)
 
-	router.POST("/rooms", roomHandler.Create)
+	router.POST("/hotels/:id/rooms", roomHandler.Create)
 
 	return router
 }

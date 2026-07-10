@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"time"
+	"strconv"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,13 +16,20 @@ func NewHandler(s *Service) *Handler {
 	return &Handler{service: s}
 }
 
-func (h *Handler) Create(c *gin.Context) {
+func (h *Handler) Create(c *gin.Context) { 
+	hotelID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID do hotel inválido. Deve ser um número inteiro."})
+		return
+	}
+
 	var input CreateRoomInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos: " + err.Error()})
 		return
 	}
 
+	input.HotelID = int64(hotelID)
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 

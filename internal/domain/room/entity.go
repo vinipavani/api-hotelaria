@@ -20,7 +20,7 @@ type Room struct {
 }
 
 type CreateRoomInput struct {
-	HotelID       int64    `json:"hotel_id" binding:"required"`
+	HotelID       int64    `json:"-"`
 	Type          RoomType `json:"type" binding:"required"`
 	Capacity      int      `json:"capacity" binding:"required"`
 	PerNightValue float64  `json:"per_night_value" binding:"required"`
