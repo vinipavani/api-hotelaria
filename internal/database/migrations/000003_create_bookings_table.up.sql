@@ -2,7 +2,8 @@ CREATE TABLE if NOT EXISTS bookings(
     id BIGSERIAL PRIMARY KEY,
     room_id BIGINT NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
     guest_name VARCHAR(100) NOT NULL,
+    status VARCHAR(50) NOT NULL CHECK (status IN ('em_estadia', 'finalizada')),
     check_in_date DATE NOT NULL,
     check_out_date DATE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 )
