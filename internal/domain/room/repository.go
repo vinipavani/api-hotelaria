@@ -38,6 +38,23 @@ func (r *Repository) FindAll(ctx context.Context, HotelID string) ([]*Room, erro
 	return rooms, nil
 }
 
+func (r *Repository) FindByID(ctx context.Context, id string) (*Room, error) {
+	query := `
+		SELECT id, hotel_id, number, type, capacity, per_night_value, created_at
+		FROM rooms
+		WHERE id = $1
+	`
+
+	var rm Room
+	row := rm.db.QueryRow(ctx, query, id)
+	err := row.Scan(&rm.ID, &rm.HotelID, &rm.Number, &rm.Type, &rm.Capacity, &rm.PerNightValue, &rm.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &rm, nil
+}
+
 func buildList(dbRows pgx.Rows) ([]*Room, error) {
 	rooms := []*Room{}
 
@@ -76,3 +93,4 @@ func (r *Repository) Insert(ctx context.Context, rm *Room) error {
 
 	return nil
 }
+
