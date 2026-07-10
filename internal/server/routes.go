@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"api-hotelaria/internal/domain/hotel"
+	"api-hotelaria/internal/domain/room"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -15,6 +16,12 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	router.GET("/hotels", hotelHandler.List)
 	router.POST("/hotels", hotelHandler.Create)
+
+	roomRepo := room.NewRepository(s.db)
+	roomService := room.NewService(roomRepo)
+	roomHandler := room.NewHandler(roomService)
+
+	router.POST("/rooms", roomHandler.Create)
 
 	return router
 }
