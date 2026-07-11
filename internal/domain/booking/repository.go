@@ -34,16 +34,16 @@ func (r *Repository) Create(ctx context.Context, b *Booking) error {
 	return nil
 }
 
-func (r *Repository) UpdateCheckOut(ctx context.Context, id int64, checkOutDate string) (*Booking, error) {
+func (r *Repository) UpdateCheckOut(ctx context.Context, RoomID int64, checkOutDate string) (*Booking, error) {
 	query := `
 		UPDATE bookings 
 		SET check_out_date = $1, status = 'finalizada'
-		WHERE id = $2
+		WHERE room_id = $2 AND status = 'em_estadia'
 		RETURNING id, room_id, guest_name, guest_document, check_in_date, check_out_date, status, created_at;
 	`
 
 	var b Booking
-	row := r.db.QueryRow(ctx, query, checkOutDate, id)
+	row := r.db.QueryRow(ctx, query, checkOutDate, RoomID)
 	err := scanBookingRow(row, &b)
 
 	if err != nil {
