@@ -1,0 +1,2 @@
+ALTER TABLE bookings 
+ADD COLUMN IF NOT EXISTS guest_document VARCHAR(50) NOT NULL
