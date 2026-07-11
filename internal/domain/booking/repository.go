@@ -2,8 +2,9 @@ package booking
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Repository struct {
@@ -24,10 +25,10 @@ func (r *Repository) Create(ctx context.Context, b *Booking) error {
 	`
 
 	row := r.db.QueryRow(ctx, query, b.RoomID, b.GuestName, b.GuestDocument, b.CheckInDate, b.Status)
-	err := scanBookingRow(row, &b)
+	err := scanBookingRow(row, b)
 
 	if err != nil {
-		return err  
+		return err
 	}
 
 	return nil
@@ -44,7 +45,7 @@ func (r *Repository) UpdateCheckOut(ctx context.Context, id int64, checkOutDate 
 	var b Booking
 	row := r.db.QueryRow(ctx, query, checkOutDate, id)
 	err := scanBookingRow(row, &b)
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -81,6 +82,3 @@ func scanBookingRow(row pgx.Row, b *Booking) error {
 		&b.CreatedAt,
 	)
 }
-
-
-
