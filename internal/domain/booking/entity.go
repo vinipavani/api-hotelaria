@@ -16,7 +16,7 @@ type Booking struct {
 	GuestDocument string        `json:"guest_document"`
 	Status        BookingStatus `json:"status"`
 	CheckInDate   time.Time     `json:"check_in"`
-	CheckOutDate  time.Time     `json:"check_out"`
+	CheckOutDate  *time.Time    `json:"check_out"`
 	CreatedAt     time.Time     `json:"created_at"`
 }
 
