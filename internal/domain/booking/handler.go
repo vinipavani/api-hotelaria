@@ -13,6 +13,17 @@ type Handler struct {
 	service *Service
 }
 
+type BookingResponse struct {
+	ID            int64         `json:"id"`
+	RoomID        int64         `json:"room_id"`
+	GuestName     string        `json:"guest_name"`
+	GuestDocument string        `json:"guest_document"`
+	Status        BookingStatus `json:"status"`
+	CheckInDate   string        `json:"check_in"`
+	CheckOutDate  string        `json:"check_out,omitempty"`
+	CreatedAt     time.Time     `json:"created_at"`
+}
+
 func NewHandler(s *Service) *Handler {
 	return &Handler{service: s}
 }
@@ -48,7 +59,7 @@ func (h *Handler) CheckIn(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, newBooking)
+	c.JSON(http.StatusCreated, buildResponseBooking(newBooking))
 }
 
 func (h *Handler) CheckOut(c *gin.Context) {
@@ -78,7 +89,26 @@ func (h *Handler) CheckOut(c *gin.Context) {
 		return
 	case err == RoomAvailable:
 		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		return
 	}
 
-	c.JSON(http.StatusOK, booking)
+	c.JSON(http.StatusOK, buildResponseBooking(booking))
+}
+
+func buildResponseBooking(b *Booking) BookingResponse {
+	checkoutStr := ""
+	if b.CheckOutDate != nil && !b.CheckOutDate.IsZero() {
+		checkoutStr = b.CheckOutDate.Format("2006-01-02")
+	}
+
+	return BookingResponse{
+		ID:            b.ID,
+		RoomID:        b.RoomID,
+		GuestName:     b.GuestName,
+		GuestDocument: b.GuestDocument,
+		Status:        b.Status,
+		CheckInDate:   b.CheckInDate.Format("2006-01-02"),
+		CheckOutDate:  checkoutStr,
+		CreatedAt:     b.CreatedAt,
+	}
 }
