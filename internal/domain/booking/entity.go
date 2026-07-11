@@ -20,9 +20,14 @@ type Booking struct {
 	CreatedAt     time.Time     `json:"created_at"`
 }
 
-type BookingInput struct {
+type CheckInInput struct {
 	RoomID        int64  `json:"room_id"`
 	GuestName     string `json:"guest_name" binding:"required"`
 	GuestDocument string `json:"guest_document" binding:"required"`
 	CheckIn       string `json:"check_in" binding:"required"`
+}
+
+type CheckOutInput struct {
+	RoomID   int64  `json:"room_id"`
+	CheckOut string `json:"check_out" binding:"required"`
 }
