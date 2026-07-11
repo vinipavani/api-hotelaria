@@ -1,7 +1,4 @@
 services:
-  # --------------------------------------------------------
-  # SERVIÇO DO BANCO DE DADOS
-  # --------------------------------------------------------
   db:
     image: postgres:17-alpine
     container_name: api_postgres
@@ -14,9 +11,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # --------------------------------------------------------
-  # SERVIÇO DA API 
-  # --------------------------------------------------------
   api:
     build:
       context: .
