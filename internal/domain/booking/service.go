@@ -1,9 +1,9 @@
 package booking
 
 import (
+	"api-hotelaria/internal/domain/room"
 	"context"
 	"errors"
-	"api-hotelaria/internal/domain/room"
 )
 
 var (
@@ -14,13 +14,13 @@ var (
 )
 
 type Service struct {
-	repo *Repository
+	repo     *Repository
 	roomRepo *room.Repository
 }
 
 func NewService(repository *Repository, roomRepository *room.Repository) *Service {
 	return &Service{
-		repo: repository,
+		repo:     repository,
 		roomRepo: roomRepository,
 	}
 }
@@ -48,25 +48,25 @@ func validateParams(RoomID int64, input BookingInput) (*Booking, error) {
 	if input.GuestName == "" || input.GuestDocument == "" {
 		return nil, GuestParamsError
 	}
-	if input.CheckInDate == "" {
+	if input.CheckInDate.IsZero() {
 		return nil, CheckInDateError
 	}
 
 	return &Booking{
-		RoomID:         RoomID,
-		GuestName:      input.GuestName,
-		GuestDocument:  input.GuestDocument,
-		CheckInDate:    input.CheckInDate,
-		Status:         BookingStatusInProgress,
+		RoomID:        RoomID,
+		GuestName:     input.GuestName,
+		GuestDocument: input.GuestDocument,
+		CheckInDate:   input.CheckInDate,
+		Status:        BookingStatusInProgress,
 	}, nil
 }
 
 func validateRoom(RoomID int64, roomRepo *room.Repository, ctx context.Context) error {
-	room, err := roomRepo.findByID(ctx, RoomID)
+	room, err := roomRepo.FindByID(ctx, RoomID)
 	if room == nil || err != nil {
 		return ErrRoomNotFound
 	}
-	
+
 	isAvailable, err := s.repo.isBookingAvailable(ctx, RoomID)
 	if !isAvailable {
 		return RoomNotAvailable
