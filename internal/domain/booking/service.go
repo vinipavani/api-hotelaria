@@ -4,13 +4,14 @@ import (
 	"api-hotelaria/internal/domain/room"
 	"context"
 	"errors"
+	"time"
 )
 
 var (
 	ErrRoomNotFound  = errors.New("Quarto não encontrado.")
 	RoomNotAvailable = errors.New("Quarto já está ocupado.")
 	GuestParamsError = errors.New("Os dados do cliente nome e número do documento são obrigatórios.")
-	CheckInDateError = errors.New("A Data de checkin é obrigatória.")
+	CheckInDateError = errors.New("A Data de checkin deve ser uma data valida no formato: 'YYYY-MM-DD'.")
 )
 
 type Service struct {
@@ -51,7 +52,9 @@ func validateParams(RoomID int64, input BookingInput) (*Booking, error) {
 	if input.GuestName == "" || input.GuestDocument == "" {
 		return nil, GuestParamsError
 	}
-	if input.CheckInDate.IsZero() {
+
+	checkInTime, err := time.Parse("2006-01-02", input.CheckIn)
+	if err != nil {
 		return nil, CheckInDateError
 	}
 
@@ -59,7 +62,7 @@ func validateParams(RoomID int64, input BookingInput) (*Booking, error) {
 		RoomID:        RoomID,
 		GuestName:     input.GuestName,
 		GuestDocument: input.GuestDocument,
-		CheckInDate:   input.CheckInDate,
+		CheckInDate:   checkInTime,
 		Status:        BookingStatusInProgress,
 	}, nil
 }

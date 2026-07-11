@@ -21,6 +21,7 @@ func (h *Handler) CheckIn(c *gin.Context) {
 	RoomIDParam, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "RoomID deve ser um número inteiro."})
+		return
 	}
 
 	RoomID := int64(RoomIDParam)
