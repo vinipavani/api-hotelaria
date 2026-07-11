@@ -2,8 +2,9 @@ package room
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Repository struct {
@@ -46,7 +47,7 @@ func (r *Repository) FindByID(ctx context.Context, id string) (*Room, error) {
 	`
 
 	var rm Room
-	row := rm.db.QueryRow(ctx, query, id)
+	row := r.db.QueryRow(ctx, query, id)
 	err := row.Scan(&rm.ID, &rm.HotelID, &rm.Number, &rm.Type, &rm.Capacity, &rm.PerNightValue, &rm.CreatedAt)
 	if err != nil {
 		return nil, err
@@ -93,4 +94,3 @@ func (r *Repository) Insert(ctx context.Context, rm *Room) error {
 
 	return nil
 }
-
