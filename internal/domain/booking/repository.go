@@ -53,7 +53,7 @@ func (r *Repository) UpdateCheckOut(ctx context.Context, RoomID int64, checkOutD
 	return &b, nil
 }
 
-func (r *Repository) isBookingAvailable(ctx context.Context, RoomID int64) (bool, error) {
+func (r *Repository) IsBookingAvailable(ctx context.Context, RoomID int64) (bool, error) {
 	query := `
 		SELECT COUNT(*)
 		FROM bookings

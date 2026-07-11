@@ -103,7 +103,7 @@ func validateRoom(RoomID int64, roomRepo *room.Repository, ctx context.Context) 
 }
 
 func isBookingAvailable(RoomID int64, r *Repository, ctx context.Context) (bool, error) {
-	isAvailable, err := r.isBookingAvailable(ctx, RoomID)
+	isAvailable, err := r.IsBookingAvailable(ctx, RoomID)
 	if err != nil {
 		return false, err
 	}

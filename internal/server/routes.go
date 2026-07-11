@@ -23,8 +23,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	roomService := room.NewService(roomRepo)
 	roomHandler := room.NewHandler(roomService)
 
-	router.POST("/hotels/:id/rooms", roomHandler.Create)
 	router.GET("/hotels/:id/rooms", roomHandler.List)
+	router.POST("/hotels/:id/rooms", roomHandler.Create)
 
 	bookingRepo := booking.NewRepository(s.db)
 	bookingService := booking.NewService(bookingRepo, roomRepo)
