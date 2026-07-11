@@ -1,10 +1,12 @@
 package server
 
 import (
-	"net/http"
-	"github.com/gin-gonic/gin"
+	"api-hotelaria/internal/domain/booking"
 	"api-hotelaria/internal/domain/hotel"
 	"api-hotelaria/internal/domain/room"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
