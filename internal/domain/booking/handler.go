@@ -3,7 +3,9 @@ package booking
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +18,12 @@ func NewHandler(s *Service) *Handler {
 }
 
 func (h *Handler) CheckIn(c *gin.Context) {
-	RoomID := int64(c.Param("id"))
+	RoomIDParam, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "RoomID deve ser um número inteiro."})
+	}
+
+	RoomID := int64(RoomIDParam)
 	var input BookingInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
