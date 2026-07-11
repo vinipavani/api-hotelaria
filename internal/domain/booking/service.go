@@ -31,8 +31,11 @@ func (s *Service) CreateCheckIn(ctx context.Context, RoomID int64, input Booking
 		return nil, err
 	}
 
-	err = validateRoom(RoomID, s.roomRepo, ctx)
-	if err != nil {
+	if err = validateRoom(RoomID, s.roomRepo, ctx); err != nil {
+		return nil, err
+	}
+
+	if err := validateBooking(RoomID, s.repo, ctx); err != nil {
 		return nil, err
 	}
 
@@ -67,7 +70,11 @@ func validateRoom(RoomID int64, roomRepo *room.Repository, ctx context.Context) 
 		return ErrRoomNotFound
 	}
 
-	isAvailable, err := s.repo.isBookingAvailable(ctx, RoomID)
+	return nil
+}
+
+func validateBooking(RoomID int64, r *Repository, ctx context.Context) error {
+	isAvailable, err := r.isBookingAvailable(ctx, RoomID)
 	if !isAvailable {
 		return RoomNotAvailable
 	} else if err != nil {
