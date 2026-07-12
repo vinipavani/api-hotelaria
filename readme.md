@@ -59,6 +59,27 @@ O projeto utiliza um `Makefile` para resumir operações longas do Docker em com
 
 ---
 
+### 🗺️ Diagrama Entidade-Relacionamento (DER)
+
+<img width="1216" height="331" alt="image" src="https://github.com/user-attachments/assets/653f1e4e-57e4-4ca5-b485-1ec86ab71bb9" />
+
+### 🔗 Regras de Relacionamento e Cardinalidade
+
+A arquitetura do banco de dados foi desenhada para refletir com precisão os processos do negócio hoteleiro, utilizando restrições de chaves estrangeiras rígidas para impedir dados órfãos e garantir a consistência total do sistema.
+
+#### 1. Hotéis (`hotels`) ➡️ Quartos (`rooms`)
+* **Entidade de Primeira Classe:** A tabela de hotéis é um recurso independente e livre. Ela não depende de nenhuma outra tabela para nascer no sistema.
+* **Pertencimento Estrito (1:N):** Cada quarto obrigatoriamente **precisa pertencer a um único hotel** (`hotel_id NOT NULL`). Não existe quarto órfão ou compartilhado entre estabelecimentos.
+* **Cardinalidade:** Um hotel pode nascer totalmente zerado e ter **0 ou N quartos** associados a ele ao longo do tempo.
+* **Deleção em Cascata:** Se um hotel for removido do sistema, o PostgreSQL aciona nativamente o comportamento `ON DELETE CASCADE`. Isso significa que todos os quartos atrelados a ele serão sumariamente deletados em background, blindando o banco contra lixo e inconsistências.
+* **Unicidade Local Controlada:** Embora dois hotéis diferentes possam ter um quarto com o número `"0101"`, o sistema proíbe que o mesmo hotel tenha dois quartos iguais. Isso é travado pela restrição de unicidade composta (`unique_hotel_room_number`), que amarra o ID do hotel com o número textual do quarto.
+
+#### 2. Quartos (`rooms`) ➡️ Reservas/Hospedagens (`bookings`)
+* **Dependência Operacional (1:N):** A tabela de reservas é um recurso totalmente dependente. Uma hospedagem não faz sentido sozinha e precisa obrigatoriamente **apontar para um quarto físico existente** (`room_id NOT NULL`).
+* **Cardinalidade Histórica:** Um quarto individual pode possuir um histórico de **0 ou N registros de hospedagem** no decorrer dos anos.
+* **Regra de Ouro (Trava Dinâmica de Ocupação):** Embora o relacionamento técnico seja de 1 para N, o motor de regras de negócio em Go (Service) junto ao banco impõe uma restrição temporal rigorosa: **um quarto só pode possuir, no máximo, 1 reserva com o status `'em_estadia'` por vez**. Novos registros de entrada ficam bloqueados até que o registro ativo sofra um evento de check-out, mudando seu estado para `'finalizada'`.
+* **Ciclo de Vida Amarrado:** Seguindo o fluxo de cascata, caso um quarto específico seja excluído da base (por exemplo, para uma reforma estrutural definitiva), todo o histórico de bookings e estadias daquele quarto também será limpo automaticamente via `ON DELETE CASCADE`.
+
 ## 🚀 Endpoints da API (Exemplos de Uso)
 
 Abaixo estão listados todos os endpoints disponíveis na API de Hotelaria, organizados pelo padrão de recursos RESTful, contendo exemplos práticos de requisições utilizando o `curl` e as respectivas respostas esperadas.
