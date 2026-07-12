@@ -31,7 +31,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	bookingHandler := booking.NewHandler(bookingService)
 
 	router.POST("/rooms/:id/check-in", bookingHandler.CheckIn)
-	router.PATCH("/rooms/:id/check-out", bookingHandler.CheckOut)
+	router.POST("/rooms/:id/check-out", bookingHandler.CheckOut)
 
 	return router
 }
