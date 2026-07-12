@@ -54,6 +54,9 @@ func (h *Handler) CheckIn(c *gin.Context) {
 	case err == ErrRoomNotFound:
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
+	case err == RoomNotAvailable:
+		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		return
 	case err != nil:
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao criar o check-in: " + err.Error()})
 		return
