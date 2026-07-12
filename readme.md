@@ -135,21 +135,20 @@ curl -i -X POST http://localhost:8080/hotels/1/rooms \
 #### 4. Listar Quartos de um Hotel
 * **Rota:** `GET /hotels/:id/rooms`
 * **Descrição:** Lista os quartos de um hotel. Permite passar o Query Parameter `disponivel=true` para omitir quartos ocupados em tempo real.
-* **Exemplo de Requisição (Apenas Disponíveis):**
+* **Exemplo de Requisição:**
 ```bash
-curl -i -X GET "http://localhost:8080/hotels/1/rooms
+curl -i -X GET http://localhost:8080/hotels/1/rooms
 ```
 * **Exemplo de Resposta (200 OK):**
 ```json
 [
   {
-    "id": 2,
+    "id": 1,
     "hotel_id": 1,
     "number": "0002",
     "type": "double",
     "capacity": 2,
     "per_night_value": 200,
-    "available": true,
     "created_at": "2026-07-12T15:10:00Z"
   }
 ]
@@ -200,7 +199,7 @@ curl -i -X POST http://localhost:8080/rooms/1/check-out \
   "id": 1,
   "room_id": 1,
   "guest_name": "Vinicius Dev",
-  "guest_document": "123456789",
+  "guest_document": "123.456.789-00",
   "status": "finalizada",
   "check_in": "2026-07-12",
   "check_out": "2026-07-15",
