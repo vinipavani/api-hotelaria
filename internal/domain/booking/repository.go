@@ -45,7 +45,6 @@ func (r *Repository) UpdateCheckOut(ctx context.Context, RoomID int64, checkOutD
 	var b Booking
 	row := r.db.QueryRow(ctx, query, checkOutDate, RoomID)
 	err := scanBookingRow(row, &b)
-
 	if err != nil {
 		return nil, err
 	}
@@ -68,6 +67,23 @@ func (r *Repository) IsBookingAvailable(ctx context.Context, RoomID int64) (bool
 	}
 
 	return count == 0, nil
+}
+
+func (r *Repository) getInProgressBooking(ctx context.Context, RoomID int64) (*Booking, error) {
+	query := `
+		SELECT id, room_id, guest_name, guest_document, check_in_date, check_out_date, status, created_at
+		FROM bookings
+		WHERE room_id = $1 AND status = $2
+	`
+
+	var b Booking
+	row := r.db.QueryRow(ctx, query, RoomID, BookingStatusInProgress)
+	err := scanBookingRow(row, &b)
+	if err != nil {
+		return nil, err
+	}
+
+	return &b, nil
 }
 
 func scanBookingRow(row pgx.Row, b *Booking) error {

@@ -8,12 +8,13 @@ import (
 )
 
 var (
-	ErrRoomNotFound   = errors.New("Quarto não encontrado.")
-	RoomNotAvailable  = errors.New("Quarto já está ocupado.")
-	GuestParamsError  = errors.New("Os dados do cliente nome e número do documento são obrigatórios.")
-	CheckInDateError  = errors.New("A Data de check-in deve ser uma data valida no formato: 'YYYY-MM-DD'.")
-	CheckOutDateError = errors.New("A Data de check-out deve ser uma data valida no formato: 'YYYY-MM-DD'.")
-	RoomAvailable     = errors.New("O quarto não possui estadia ativa.")
+	RoomNotFound              = errors.New("Quarto não encontrado.")
+	RoomNotAvailable          = errors.New("Quarto já está ocupado.")
+	InvalidGuestParams        = errors.New("Os dados do cliente nome e número do documento são obrigatórios.")
+	InvalidCheckInDateFormat  = errors.New("A data de check-in deve ser uma data valida no formato: 'YYYY-MM-DD'.")
+	InvalidCheckOutDateFormat = errors.New("A data de check-out deve ser uma data valida no formato: 'YYYY-MM-DD'.")
+	CheckOutLesserThanCheckIn = errors.New("A data do check-out não pode ser anterior a do check-in.")
+	RoomAvailable             = errors.New("O quarto não possui estadia ativa.")
 )
 
 type Service struct {
@@ -58,15 +59,19 @@ func (s *Service) CheckOut(ctx context.Context, RoomID int64, input CheckOutInpu
 		return nil, err
 	}
 
+	checkOutTime, err := time.Parse("2006-01-02", input.CheckOut)
+	if err != nil {
+		return nil, InvalidCheckOutDateFormat
+	}
+
+	if err := validateCheckOutDate(checkOutTime, RoomID, s.repo, ctx); err != nil {
+		return nil, err
+	}
+
 	if isAvailable, err := isBookingAvailable(RoomID, s.repo, ctx); err != nil {
 		return nil, err
 	} else if isAvailable {
 		return nil, RoomAvailable
-	}
-
-	_, err := time.Parse("2006-01-02", input.CheckOut)
-	if err != nil {
-		return nil, CheckOutDateError
 	}
 
 	booking, err = s.repo.UpdateCheckOut(ctx, RoomID, input.CheckOut)
@@ -76,12 +81,12 @@ func (s *Service) CheckOut(ctx context.Context, RoomID int64, input CheckOutInpu
 
 func validateParams(RoomID int64, input CheckInInput) (*Booking, error) {
 	if input.GuestName == "" || input.GuestDocument == "" {
-		return nil, GuestParamsError
+		return nil, InvalidGuestParams
 	}
 
 	checkInTime, err := time.Parse("2006-01-02", input.CheckIn)
 	if err != nil {
-		return nil, CheckInDateError
+		return nil, InvalidCheckInDateFormat
 	}
 
 	return &Booking{
@@ -96,7 +101,7 @@ func validateParams(RoomID int64, input CheckInInput) (*Booking, error) {
 func validateRoom(RoomID int64, roomRepo *room.Repository, ctx context.Context) error {
 	room, err := roomRepo.FindByID(ctx, RoomID)
 	if room == nil || err != nil {
-		return ErrRoomNotFound
+		return RoomNotFound
 	}
 
 	return nil
@@ -109,4 +114,17 @@ func isBookingAvailable(RoomID int64, r *Repository, ctx context.Context) (bool,
 	}
 
 	return isAvailable, nil
+}
+
+func validateCheckOutDate(checkOut time.Time, RoomID int64, r *Repository, ctx context.Context) error {
+	b, err := r.getInProgressBooking(ctx, RoomID)
+	if err != nil {
+		return err
+	}
+
+	if checkOut.Before(b.CheckInDate) {
+		return CheckOutLesserThanCheckIn
+	}
+
+	return nil
 }
