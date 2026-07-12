@@ -17,12 +17,14 @@ func NewRepository(database *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) FindAll(ctx context.Context, HotelID string) ([]*Room, error) {
+func (r *Repository) FindAll(ctx context.Context, HotelID string, availableOnly bool) ([]*Room, error) {
 	query := `
 		Select id, hotel_id, number, type, capacity, per_night_value, created_at
 		From rooms
 		Where hotel_id = $1
 	`
+	query += avaialbleFilter(availableOnly)
+
 	rows, err := r.db.Query(ctx, query, HotelID)
 	if err != nil {
 		return nil, err
@@ -56,23 +58,6 @@ func (r *Repository) FindByID(ctx context.Context, id int64) (*Room, error) {
 	return &rm, nil
 }
 
-func buildList(dbRows pgx.Rows) ([]*Room, error) {
-	rooms := []*Room{}
-
-	for dbRows.Next() {
-		var r Room
-
-		err := dbRows.Scan(&r.ID, &r.HotelID, &r.Number, &r.Type, &r.Capacity, &r.PerNightValue, &r.CreatedAt)
-		if err != nil {
-			return nil, err
-		}
-
-		rooms = append(rooms, &r)
-	}
-
-	return rooms, nil
-}
-
 func (r *Repository) Insert(ctx context.Context, rm *Room) error {
 	query := `
 		INSERT INTO rooms (hotel_id, number, type, capacity, per_night_value)
@@ -93,4 +78,36 @@ func (r *Repository) Insert(ctx context.Context, rm *Room) error {
 	}
 
 	return nil
+}
+
+func buildList(dbRows pgx.Rows) ([]*Room, error) {
+	rooms := []*Room{}
+
+	for dbRows.Next() {
+		var r Room
+
+		err := dbRows.Scan(&r.ID, &r.HotelID, &r.Number, &r.Type, &r.Capacity, &r.PerNightValue, &r.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		rooms = append(rooms, &r)
+	}
+
+	return rooms, nil
+}
+
+func avaialbleFilter(available bool) string {
+	if available {
+		return `
+			AND NOT EXISTS (
+				SELECT 1 
+				FROM bookings 
+				WHERE bookings.room_id = rooms.id 
+				AND bookings.status = 'em_estadia'
+			)
+		`
+	}
+
+	return ""
 }

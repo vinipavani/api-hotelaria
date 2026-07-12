@@ -15,12 +15,12 @@ func NewService(repository *Repository) *Service {
 	}
 }
 
-func (s *Service) findAllRooms(ctx context.Context, hotelID string) ([]*Room, error) {
-	rooms, err := s.repo.FindAll(ctx, hotelID)
+func (s *Service) findAllRooms(ctx context.Context, hotelID string, availableOnly bool) ([]*Room, error) {
+	rooms, err := s.repo.FindAll(ctx, hotelID, availableOnly)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return rooms, nil
 }
 
@@ -50,9 +50,9 @@ func validateParams(hotelID int64, rt RoomType, capacity int, perNightValue floa
 	}
 
 	validRoom := &Room{
-		HotelID: hotelID,
-		Type: rt,
-		Capacity: capacity,
+		HotelID:       hotelID,
+		Type:          rt,
+		Capacity:      capacity,
 		PerNightValue: perNightValue,
 	}
 

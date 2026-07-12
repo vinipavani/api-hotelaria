@@ -3,8 +3,9 @@ package room
 import (
 	"context"
 	"net/http"
-	"time"
 	"strconv"
+	"time"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,11 +19,21 @@ func NewHandler(s *Service) *Handler {
 
 func (h *Handler) List(c *gin.Context) {
 	hotelID := c.Param("id")
+	availableOnly := false
+	var err error
+
+	if availableParam := c.Query("disponivel"); availableParam != "" {
+		availableOnly, err = strconv.ParseBool(availableParam)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Erro no parametro 'disponivel', o valor deve ser booleano: " + err.Error()})
+			return
+		}
+	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	rooms, err := h.service.findAllRooms(ctx, hotelID)
+	rooms, err := h.service.findAllRooms(ctx, hotelID, availableOnly)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao listar os quartos: " + err.Error()})
 		return
@@ -31,7 +42,7 @@ func (h *Handler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, rooms)
 }
 
-func (h *Handler) Create(c *gin.Context) { 
+func (h *Handler) Create(c *gin.Context) {
 	hotelID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID do hotel inválido. Deve ser um número inteiro."})
