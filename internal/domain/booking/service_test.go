@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 )
 
 type mockRoomRepository struct {
@@ -19,7 +20,7 @@ type mockBookingRepository struct {
 	onCreate               func(ctx context.Context, b *Booking) error
 	onIsBookingAvailable   func(ctx context.Context, RoomID int64) (bool, error)
 	onUpdateCheckOut       func(ctx context.Context, RoomID int64, checkOutDate string) (*Booking, error)
-	onGetInProgressBooking func(ctx context.Context, RoomID int64) (*Booking, error) // ✅ Novo método mapeado
+	onGetInProgressBooking func(ctx context.Context, RoomID int64) (*Booking, error)
 }
 
 func (m *mockBookingRepository) Create(ctx context.Context, b *Booking) error {
@@ -100,6 +101,79 @@ func TestCreateCheckIn_Suite(t *testing.T) {
 
 		if !errors.Is(err, RoomNotAvailable) {
 			t.Errorf("esperava erro '%v', recebeu: '%v'", RoomNotAvailable, err)
+		}
+	})
+}
+
+func TestCheckOut_Suite(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("should update booking successfully under ideal conditions", func(t *testing.T) {
+		roomMock := &mockRoomRepository{
+			onFindByID: func(ctx context.Context, id int64) (*room.Room, error) {
+				return &room.Room{ID: id}, nil
+			},
+		}
+		bookingMock := &mockBookingRepository{
+			onGetInProgressBooking: func(ctx context.Context, RoomID int64) (*Booking, error) {
+				checkInTime, _ := time.Parse("2006-01-02", "2026-07-10")
+				return &Booking{RoomID: RoomID, CheckInDate: checkInTime}, nil
+			},
+			onIsBookingAvailable: func(ctx context.Context, RoomID int64) (bool, error) {
+				return false, nil
+			},
+			onUpdateCheckOut: func(ctx context.Context, RoomID int64, checkOutDate string) (*Booking, error) {
+				checkInTime, _ := time.Parse("2006-01-02", "2026-07-10")
+				checkOutTime, _ := time.Parse("2006-01-02", checkOutDate)
+
+				return &Booking{
+					ID:            100,
+					RoomID:        RoomID,
+					GuestName:     "Vinicius Dev",
+					GuestDocument: "123.456.789-00",
+					Status:        BookingStatusFinished,
+					CheckInDate:   checkInTime,
+					CheckOutDate:  &checkOutTime,
+				}, nil
+			},
+		}
+
+		service := NewService(bookingMock, roomMock)
+		input := CheckOutInput{CheckOut: "2026-07-13"}
+
+		result, err := service.CheckOut(ctx, 1, input)
+
+		if err != nil {
+			t.Fatalf("esperava erro nulo, recebeu: %v", err)
+		}
+		if result == nil {
+			t.Fatalf("esperava um objeto de booking preenchido, mas recebeu nil")
+		}
+		if result.Status != BookingStatusFinished {
+			t.Errorf("esperava status %s, recebeu: %s", BookingStatusFinished, result.Status)
+		}
+	})
+
+	t.Run("should block if checkout date is prior to checkin date", func(t *testing.T) {
+		roomMock := &mockRoomRepository{
+			onFindByID: func(ctx context.Context, id int64) (*room.Room, error) {
+				return &room.Room{ID: id}, nil
+			},
+		}
+		bookingMock := &mockBookingRepository{
+			onGetInProgressBooking: func(ctx context.Context, RoomID int64) (*Booking, error) {
+				checkInTime, _ := time.Parse("2006-01-02", "2026-07-15")
+				return &Booking{RoomID: RoomID, CheckInDate: checkInTime}, nil
+			},
+		}
+
+		service := NewService(bookingMock, roomMock)
+		input := CheckOutInput{CheckOut: "2026-07-10"}
+
+		_, err := service.CheckOut(ctx, 1, input)
+
+		if !errors.Is(err, CheckOutLesserThanCheckIn) {
+			t.Errorf("esperava erro '%v', recebeu: '%v'", CheckOutLesserThanCheckIn, err)
 		}
 	})
 }
