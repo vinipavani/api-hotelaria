@@ -55,6 +55,7 @@ O projeto utiliza um `Makefile` para resumir operações longas do Docker em com
 - `make setup` - Realiza a primeira carga das imagens, instala bibliotecas Go e cria o ambiente.
 - `make seed` - Popula banco de dados, com dados fakes para testes.
 - `make run` - Sobe os containers da API e do Banco exibindo os logs em tempo real.
+- `make test` - Inicia suíte de testes da aplicação.
 - `make stop` - Pausa os containers liberando a memória RAM do Linux, mas mantém todos os dados salvos.
 - `make clean` - Remove permanentemente os containers e apaga os dados/volumes do PostgreSQL (útil para resets).
 
