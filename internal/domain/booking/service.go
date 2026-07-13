@@ -75,14 +75,14 @@ func (s *Service) CheckOut(ctx context.Context, RoomID int64, input CheckOutInpu
 		return nil, InvalidCheckOutDateFormat
 	}
 
-	if err := validateCheckOutDate(checkOutTime, RoomID, s.repo, ctx); err != nil {
-		return nil, err
-	}
-
 	if isAvailable, err := isBookingAvailable(RoomID, s.repo, ctx); err != nil {
 		return nil, err
 	} else if isAvailable {
 		return nil, RoomAvailable
+	}
+
+	if err := validateCheckOutDate(checkOutTime, RoomID, s.repo, ctx); err != nil {
+		return nil, err
 	}
 
 	booking, err = s.repo.UpdateCheckOut(ctx, RoomID, input.CheckOut)
