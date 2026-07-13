@@ -6,11 +6,16 @@ import (
 	"strings"
 )
 
-type Service struct {
-	repo *Repository
+type HotelRepository interface {
+	FindAll(ctx context.Context) ([]*Hotel, error)
+	Insert(ctx context.Context, h *Hotel) error
 }
 
-func NewService(repository *Repository) *Service {
+type Service struct {
+	repo HotelRepository
+}
+
+func NewService(repository HotelRepository) *Service {
 	return &Service{
 		repo: repository,
 	}
