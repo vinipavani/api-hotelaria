@@ -69,7 +69,7 @@ func (r *Repository) IsBookingAvailable(ctx context.Context, RoomID int64) (bool
 	return count == 0, nil
 }
 
-func (r *Repository) getInProgressBooking(ctx context.Context, RoomID int64) (*Booking, error) {
+func (r *Repository) GetInProgressBooking(ctx context.Context, RoomID int64) (*Booking, error) {
 	query := `
 		SELECT id, room_id, guest_name, guest_document, check_in_date, check_out_date, status, created_at
 		FROM bookings
