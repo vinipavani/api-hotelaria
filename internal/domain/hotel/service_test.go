@@ -36,4 +36,19 @@ func TestCreateHotel_Suite(t *testing.T) {
 			t.Fatalf("esperava erro nulo, recebeu: %v", err)
 		}
 	})
+
+	t.Run("should return InvalidParams error if name or city weren't provided", func(t *testing.T) {
+		hotelRepoMock := &mockHotelRepository{
+			onInsert: func(ctx context.Context, h *Hotel) error {
+				return nil
+			},
+		}
+		service := NewService(hotelRepoMock)
+
+		input := CreateHotelInput{Name: "", City: "Rio de Janeiro"}
+		_, err := service.CreateHotel(ctx, input)
+		if err != InvalidParams {
+			t.Errorf("esperava erro '%v', recebeu: '%v'", InvalidParams, err)
+		}
+	})
 }
