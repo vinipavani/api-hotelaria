@@ -11,6 +11,8 @@ setup:
 	docker compose exec api go mod download
 	docker compose exec api air init || true
 	docker compose down
+	@make db-migrate
+	@make seed
 	@echo "🚀 Setup concluído com sucesso! Agora basta rodar 'make run' para iniciar."
 
 seed:
@@ -28,3 +30,12 @@ create-migration:
 	@if [ -z "$(name)" ]; then echo "⚠️ Erro: Você precisa passar o nome. Ex: make migration name=my_new_table"; exit 1; fi
 	docker run --rm -v $(PWD)/internal/database/migrations:/migrations migrate/migrate create -ext sql -dir /migrations -seq $(name)
 	@echo "✅ Arquivos de migração criados com sucesso na pasta internal/database/migrations/!"
+
+db-migrate:
+	docker compose run --rm api go run cmd/migrate/main.go up
+
+# 📝 Exemplo de uso: "make db-rollback" ou "make db-rollback steps=4" 
+steps ?= 1
+db-rollback:
+	docker compose run --rm api go run cmd/migrate/main.go down $(steps)
+

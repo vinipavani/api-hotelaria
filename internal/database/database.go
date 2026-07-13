@@ -1,18 +1,19 @@
 package database
 
 import (
+	"api-hotelaria/internal/config"
+	"api-hotelaria/internal/database/migrations"
 	"context"
 	"log"
 	"time"
-	"github.com/jackc/pgx/v5/pgxpool"
+
 	migrate "github.com/golang-migrate/migrate/v4"
+	migrateDB "github.com/golang-migrate/migrate/v4/database"
+	pgxmigrate "github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	source "github.com/golang-migrate/migrate/v4/source"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
-	pgxmigrate "github.com/golang-migrate/migrate/v4/database/pgx/v5"
-	migrateDB "github.com/golang-migrate/migrate/v4/database"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
-	"api-hotelaria/internal/config"
-	"api-hotelaria/internal/database/migrations"
 )
 
 var DB *pgxpool.Pool
@@ -37,7 +38,7 @@ func ConnectDB() {
 
 	log.Println("Conexão com o PostgreSQL do Docker estabelecida com sucesso!")
 
-	runMigrations()
+	checkMigrationsStatus()
 }
 
 func CloseDB() {
@@ -51,26 +52,11 @@ func configDatabaseConnection(dbConfig *pgxpool.Config) *pgxpool.Config {
 	dbConfig.MaxConns = 10
 	dbConfig.MinConns = 2
 	dbConfig.MaxConnIdleTime = time.Minute * 5 // Fecha conexões inativas após 5 minutos
-	
+
 	return dbConfig
 }
 
-func runMigrations() {
-	migration := migrationInstance()
-
-	err := migration.Up()
-	if err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("Erro crítico ao executar as migrações do banco: %v\n", err)
-	}
-
-	if err == migrate.ErrNoChange {
-		log.Println("✅ Banco de dados já está atualizado. Nenhuma migração pendente.")
-	} else {
-		log.Println("⚡ Migrações de banco de dados executadas com sucesso!")
-	}
-}
-
-func migrationInstance() *migrate.Migrate {
+func MigrationInstance() *migrate.Migrate {
 	driver := createMigrationDriver()
 	sourceDriver := getMemorizedMigrations()
 
@@ -80,6 +66,28 @@ func migrationInstance() *migrate.Migrate {
 	}
 
 	return migration
+}
+
+func checkMigrationsStatus() {
+	migration := MigrationInstance()
+	defer migration.Close()
+
+	version, dirty, err := migration.Version()
+	if err != nil {
+		if err == migrate.ErrNilVersion {
+			log.Println("⚠️ AVISO: Nenhuma migração foi aplicada ainda! O banco está vazio. Rode 'make db-migrate' para criar as tabelas.")
+			return
+		}
+		log.Printf("⚠️ AVISO: Falha ao verificar versão das migrações: %v\n", err)
+		return
+	}
+
+	if dirty {
+		log.Printf("🚨 ALERTA CRÍTICO: A migração da versão %d está marcada como DIRTY (Corrompida). Verifique o banco de dados!\n", version)
+		return
+	}
+
+	log.Printf("✅ Verificação de Tabelas: Banco de dados operando de forma saudável na Versão %d.\n", version)
 }
 
 func createMigrationDriver() migrateDB.Driver {
