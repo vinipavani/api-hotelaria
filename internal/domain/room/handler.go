@@ -60,7 +60,10 @@ func (h *Handler) Create(c *gin.Context) {
 	defer cancel()
 
 	newRoom, err := h.service.CreateRoom(ctx, input)
-	if err != nil {
+	if err == InvalidParams || err == InvalidRoomType {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	} else if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -14,6 +14,11 @@ type Service struct {
 	repo RoomRepository
 }
 
+var (
+	InvalidParams   = errors.New("Tipo de quarto, capacidade e diária, não pode estar em branco.")
+	InvalidRoomType = errors.New("Tipo de quarto inválido. Os tipos válidos são: single, double, suite.")
+)
+
 func NewService(repository RoomRepository) *Service {
 	return &Service{
 		repo: repository,
@@ -45,13 +50,13 @@ func (s *Service) CreateRoom(ctx context.Context, input CreateRoomInput) (*Room,
 
 func validateParams(hotelID int64, rt RoomType, capacity int, perNightValue float64) (*Room, error) {
 	if string(rt) == "" || capacity <= 0 || perNightValue <= 0 {
-		return nil, errors.New("Tipo de quarto, capacidade e diária, não pode estar em branco.")
+		return nil, InvalidParams
 	}
 
 	switch rt {
 	case RoomTypeSingle, RoomTypeDouble, RoomTypeSuite:
 	default:
-		return nil, errors.New("Tipo de quarto inválido. Os tipos válidos são: single, double, suite.")
+		return nil, InvalidRoomType
 	}
 
 	validRoom := &Room{

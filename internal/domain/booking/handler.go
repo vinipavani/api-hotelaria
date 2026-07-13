@@ -84,7 +84,7 @@ func (h *Handler) CheckOut(c *gin.Context) {
 	booking, err := h.service.CheckOut(ctx, int64(RoomIDParam), input)
 
 	switch {
-	case err == InvalidCheckOutDateFormat:
+	case err == InvalidCheckOutDateFormat || err == CheckOutLesserThanCheckIn:
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	case err == RoomNotFound:
@@ -92,9 +92,6 @@ func (h *Handler) CheckOut(c *gin.Context) {
 		return
 	case err == RoomAvailable:
 		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
-		return
-	case err == CheckOutLesserThanCheckIn:
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	case err != nil:
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao realizar o check-out: " + err.Error()})

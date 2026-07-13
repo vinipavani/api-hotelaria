@@ -3,6 +3,7 @@ package room
 import "time"
 
 type RoomType string
+
 const (
 	RoomTypeSingle RoomType = "single"
 	RoomTypeDouble RoomType = "double"
