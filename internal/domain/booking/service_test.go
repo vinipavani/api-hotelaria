@@ -6,6 +6,8 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type mockRoomRepository struct {
@@ -103,6 +105,23 @@ func TestCreateCheckIn_Suite(t *testing.T) {
 			t.Errorf("esperava erro '%v', recebeu: '%v'", RoomNotAvailable, err)
 		}
 	})
+
+	t.Run("should fail if the room ID does not exist", func(t *testing.T) {
+		roomMock := &mockRoomRepository{
+			onFindByID: func(ctx context.Context, id int64) (*room.Room, error) {
+				return nil, pgx.ErrNoRows
+			},
+		}
+
+		service := NewService(&mockBookingRepository{}, roomMock)
+		input := CheckInInput{GuestName: "Vinicius Dev", GuestDocument: "123.456.789-00", CheckIn: "2026-07-13"}
+
+		_, err := service.CreateCheckIn(ctx, 999, input)
+
+		if !errors.Is(err, RoomNotFound) {
+			t.Errorf("esperava erro '%v', recebeu: '%v'", RoomNotFound, err)
+		}
+	})
 }
 
 func TestCheckOut_Suite(t *testing.T) {
@@ -174,6 +193,23 @@ func TestCheckOut_Suite(t *testing.T) {
 
 		if !errors.Is(err, CheckOutLesserThanCheckIn) {
 			t.Errorf("esperava erro '%v', recebeu: '%v'", CheckOutLesserThanCheckIn, err)
+		}
+	})
+
+	t.Run("should fail if the room ID does not exist", func(t *testing.T) {
+		roomMock := &mockRoomRepository{
+			onFindByID: func(ctx context.Context, id int64) (*room.Room, error) {
+				return nil, pgx.ErrNoRows
+			},
+		}
+
+		service := NewService(&mockBookingRepository{}, roomMock)
+		input := CheckInInput{GuestName: "Vinicius Dev", GuestDocument: "123.456.789-00", CheckIn: "2026-07-13"}
+
+		_, err := service.CreateCheckIn(ctx, 999, input)
+
+		if !errors.Is(err, RoomNotFound) {
+			t.Errorf("esperava erro '%v', recebeu: '%v'", RoomNotFound, err)
 		}
 	})
 }
