@@ -15,6 +15,8 @@ type Service struct {
 	repo HotelRepository
 }
 
+var InvalidParams = errors.New("o nome e a cidade do hotel não podem estar em branco.")
+
 func NewService(repository HotelRepository) *Service {
 	return &Service{
 		repo: repository,
@@ -44,7 +46,7 @@ func validateParams(name string, city string) (*Hotel, error) {
 	cityClean := strings.TrimSpace(city)
 
 	if nameClean == "" || cityClean == "" {
-		return nil, errors.New("o nome e a cidade do hotel não podem estar em branco.")
+		return nil, InvalidParams
 	}
 
 	validHotel := &Hotel{

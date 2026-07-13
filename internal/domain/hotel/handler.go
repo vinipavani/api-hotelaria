@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"time"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,7 +40,10 @@ func (h *Handler) Create(c *gin.Context) {
 	defer cancel()
 
 	newHotel, err := h.service.CreateHotel(ctx, input)
-	if err != nil {
+	if err == InvalidParams {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	} else if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
