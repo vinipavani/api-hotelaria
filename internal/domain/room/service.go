@@ -5,11 +5,16 @@ import (
 	"errors"
 )
 
-type Service struct {
-	repo *Repository
+type RoomRepository interface {
+	FindAll(ctx context.Context, HotelID string, availableOnly bool) ([]*Room, error)
+	Insert(ctx context.Context, rm *Room) error
 }
 
-func NewService(repository *Repository) *Service {
+type Service struct {
+	repo RoomRepository
+}
+
+func NewService(repository RoomRepository) *Service {
 	return &Service{
 		repo: repository,
 	}
