@@ -16,6 +16,10 @@ setup:
 seed:
 	docker compose run --rm api go run cmd/seed/main.go
 
+test:
+	@echo "🧪 Executando a suíte de testes unitários dentro do contêiner..."
+	docker compose run --rm api go test -v ./...
+
 .PHONY: clean - clear database and remove containers
 clean:
 	docker compose down -v
