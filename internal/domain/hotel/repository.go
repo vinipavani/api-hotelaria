@@ -41,7 +41,7 @@ func (r *Repository) FindAll(ctx context.Context) ([]*Hotel, error) {
 
 func (r *Repository) FindByID(ctx context.Context, HotelID int64) (*Hotel, error) {
 	query := `
-		SELECT name, city
+		SELECT id, name, city, created_at
 		FROM hotels
 		WHERE id = $1
 	`
