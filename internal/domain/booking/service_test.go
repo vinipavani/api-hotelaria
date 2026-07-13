@@ -196,6 +196,32 @@ func TestCheckOut_Suite(t *testing.T) {
 		}
 	})
 
+	t.Run("should fail if the room is already available", func(t *testing.T) {
+		roomMock := &mockRoomRepository{
+			onFindByID: func(ctx context.Context, id int64) (*room.Room, error) {
+				return &room.Room{ID: id}, nil
+			},
+		}
+		bookingMock := &mockBookingRepository{
+			onIsBookingAvailable: func(ctx context.Context, RoomID int64) (bool, error) {
+				return true, nil
+			},
+			onGetInProgressBooking: func(ctx context.Context, RoomID int64) (*Booking, error) {
+				checkInTime, _ := time.Parse("2006-01-02", "2026-07-10")
+				return &Booking{RoomID: RoomID, CheckInDate: checkInTime}, nil
+			},
+		}
+
+		service := NewService(bookingMock, roomMock)
+		input := CheckOutInput{CheckOut: "2026-07-13"}
+
+		_, err := service.CheckOut(ctx, 1, input)
+
+		if !errors.Is(err, RoomAvailable) {
+			t.Errorf("esperava erro '%v', recebeu: '%v'", RoomAvailable, err)
+		}
+	})
+
 	t.Run("should fail if the room ID does not exist", func(t *testing.T) {
 		roomMock := &mockRoomRepository{
 			onFindByID: func(ctx context.Context, id int64) (*room.Room, error) {
