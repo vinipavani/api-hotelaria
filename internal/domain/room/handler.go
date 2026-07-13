@@ -37,7 +37,7 @@ func (h *Handler) List(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	rooms, err := h.service.findAllRooms(ctx, hotelID, availableOnly)
+	rooms, err := h.service.FindAllRooms(ctx, hotelID, availableOnly)
 	if err == HotelNotFound {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return

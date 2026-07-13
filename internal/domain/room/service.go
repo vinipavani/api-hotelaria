@@ -33,7 +33,7 @@ func NewService(repository RoomRepository, hotelRepository HotelRepository) *Ser
 	}
 }
 
-func (s *Service) findAllRooms(ctx context.Context, hotelID int64, availableOnly bool) ([]*Room, error) {
+func (s *Service) FindAllRooms(ctx context.Context, hotelID int64, availableOnly bool) ([]*Room, error) {
 	err := validateHotel(s.hotelRepo, ctx, hotelID)
 	if err != nil {
 		return nil, err
