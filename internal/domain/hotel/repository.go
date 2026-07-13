@@ -2,8 +2,9 @@ package hotel
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Repository struct {
@@ -38,6 +39,38 @@ func (r *Repository) FindAll(ctx context.Context) ([]*Hotel, error) {
 	return hotels, nil
 }
 
+func (r *Repository) FindById(ctx context.Context, HotelID *int64) (*Hotel, error) {
+	query := `
+		SELECT name, city
+		FROM hotels
+		WHERE id = $1
+	`
+
+	var h Hotel
+	row := r.db.QueryRow(ctx, query, HotelID)
+	err := scanHotelRow(row, &h)
+	if err != nil {
+		return nil, err
+	}
+
+	return &h, nil
+}
+
+func (r *Repository) Insert(ctx context.Context, h *Hotel) error {
+	query := `
+		INSERT INTO hotels (name, city) 
+		VALUES ($1, $2) 
+		RETURNING id, created_at;
+	`
+
+	err := r.db.QueryRow(ctx, query, h.Name, h.City).Scan(&h.ID, &h.CreatedAt)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func buildList(dbRows pgx.Rows) ([]*Hotel, error) {
 	hotels := []*Hotel{}
 
@@ -55,17 +88,11 @@ func buildList(dbRows pgx.Rows) ([]*Hotel, error) {
 	return hotels, nil
 }
 
-func (r *Repository) Insert(ctx context.Context, h *Hotel) error {
-	query := `
-		INSERT INTO hotels (name, city) 
-		VALUES ($1, $2) 
-		RETURNING id, created_at;
-	`
-
-	err := r.db.QueryRow(ctx, query, h.Name, h.City).Scan(&h.ID, &h.CreatedAt)
-	if err != nil {
-		return err
-	}
-
-	return nil
+func scanHotelRow(row pgx.Row, h *Hotel) error {
+	return row.Scan(
+		&h.ID,
+		&h.Name,
+		&h.City,
+		&h.CreatedAt,
+	)
 }
