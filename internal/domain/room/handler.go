@@ -18,9 +18,13 @@ func NewHandler(s *Service) *Handler {
 }
 
 func (h *Handler) List(c *gin.Context) {
-	hotelID := c.Param("id")
+	hotelID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID do hotel inválido. Deve ser um número inteiro."})
+		return
+	}
+
 	availableOnly := false
-	var err error
 
 	if availableParam := c.Query("disponivel"); availableParam != "" {
 		availableOnly, err = strconv.ParseBool(availableParam)
@@ -34,7 +38,10 @@ func (h *Handler) List(c *gin.Context) {
 	defer cancel()
 
 	rooms, err := h.service.findAllRooms(ctx, hotelID, availableOnly)
-	if err != nil {
+	if err == HotelNotFound {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	} else if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao listar os quartos: " + err.Error()})
 		return
 	}
@@ -60,10 +67,14 @@ func (h *Handler) Create(c *gin.Context) {
 	defer cancel()
 
 	newRoom, err := h.service.CreateRoom(ctx, input)
-	if err == InvalidParams || err == InvalidRoomType {
+	switch {
+	case err == HotelNotFound:
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	case err == InvalidParams || err == InvalidRoomType:
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
-	} else if err != nil {
+	case err != nil:
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -39,7 +39,7 @@ func (r *Repository) FindAll(ctx context.Context) ([]*Hotel, error) {
 	return hotels, nil
 }
 
-func (r *Repository) FindById(ctx context.Context, HotelID *int64) (*Hotel, error) {
+func (r *Repository) FindByID(ctx context.Context, HotelID int64) (*Hotel, error) {
 	query := `
 		SELECT name, city
 		FROM hotels

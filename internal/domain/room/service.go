@@ -1,31 +1,44 @@
 package room
 
 import (
+	"api-hotelaria/internal/domain/hotel"
 	"context"
 	"errors"
 )
 
 type RoomRepository interface {
-	FindAll(ctx context.Context, HotelID string, availableOnly bool) ([]*Room, error)
+	FindAll(ctx context.Context, HotelID int64, availableOnly bool) ([]*Room, error)
 	Insert(ctx context.Context, rm *Room) error
 }
 
+type HotelRepository interface {
+	FindByID(ctx context.Context, HotelID int64) (*hotel.Hotel, error)
+}
+
 type Service struct {
-	repo RoomRepository
+	repo      RoomRepository
+	hotelRepo HotelRepository
 }
 
 var (
 	InvalidParams   = errors.New("Tipo de quarto, capacidade e diária, não pode estar em branco.")
 	InvalidRoomType = errors.New("Tipo de quarto inválido. Os tipos válidos são: single, double, suite.")
+	HotelNotFound   = errors.New("Hotel não encontrado.")
 )
 
-func NewService(repository RoomRepository) *Service {
+func NewService(repository RoomRepository, hotelRepository HotelRepository) *Service {
 	return &Service{
-		repo: repository,
+		repo:      repository,
+		hotelRepo: hotelRepository,
 	}
 }
 
-func (s *Service) findAllRooms(ctx context.Context, hotelID string, availableOnly bool) ([]*Room, error) {
+func (s *Service) findAllRooms(ctx context.Context, hotelID int64, availableOnly bool) ([]*Room, error) {
+	err := validateHotel(s.hotelRepo, ctx, hotelID)
+	if err != nil {
+		return nil, err
+	}
+
 	rooms, err := s.repo.FindAll(ctx, hotelID, availableOnly)
 	if err != nil {
 		return nil, err
@@ -35,6 +48,11 @@ func (s *Service) findAllRooms(ctx context.Context, hotelID string, availableOnl
 }
 
 func (s *Service) CreateRoom(ctx context.Context, input CreateRoomInput) (*Room, error) {
+	err := validateHotel(s.hotelRepo, ctx, input.HotelID)
+	if err != nil {
+		return nil, err
+	}
+
 	newRoom, err := validateParams(input.HotelID, input.Type, input.Capacity, input.PerNightValue)
 	if err != nil {
 		return nil, err
@@ -67,4 +85,15 @@ func validateParams(hotelID int64, rt RoomType, capacity int, perNightValue floa
 	}
 
 	return validRoom, nil
+}
+
+func validateHotel(hr HotelRepository, ctx context.Context, hotelID int64) error {
+	hotel, err := hr.FindByID(ctx, hotelID)
+	if hotel == nil {
+		return HotelNotFound
+	} else if err != nil {
+		return err
+	}
+
+	return nil
 }

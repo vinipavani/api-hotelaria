@@ -17,7 +17,7 @@ func NewRepository(database *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) FindAll(ctx context.Context, HotelID string, availableOnly bool) ([]*Room, error) {
+func (r *Repository) FindAll(ctx context.Context, HotelID int64, availableOnly bool) ([]*Room, error) {
 	query := `
 		Select id, hotel_id, number, type, capacity, per_night_value, created_at
 		From rooms

@@ -20,7 +20,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	router.POST("/hotels", hotelHandler.Create)
 
 	roomRepo := room.NewRepository(s.db)
-	roomService := room.NewService(roomRepo)
+	roomService := room.NewService(roomRepo, hotelRepo)
 	roomHandler := room.NewHandler(roomService)
 
 	router.GET("/hotels/:id/rooms", roomHandler.List)
