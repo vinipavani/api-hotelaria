@@ -7,6 +7,22 @@ import (
 	"time"
 )
 
+type BookingRepository interface {
+	Create(ctx context.Context, b *Booking) error
+	IsBookingAvailable(ctx context.Context, RoomID int64) (bool, error)
+	UpdateCheckOut(ctx context.Context, RoomID int64, checkOutDate string) (*Booking, error)
+	GetInProgressBooking(ctx context.Context, RoomID int64) (*Booking, error)
+}
+
+type RoomRepository interface {
+	FindByID(ctx context.Context, id int64) (*room.Room, error)
+}
+
+type Service struct {
+	repo     BookingRepository
+	roomRepo RoomRepository
+}
+
 var (
 	RoomNotFound              = errors.New("Quarto não encontrado.")
 	RoomNotAvailable          = errors.New("Quarto já está ocupado.")
@@ -17,12 +33,7 @@ var (
 	RoomAvailable             = errors.New("O quarto não possui estadia ativa.")
 )
 
-type Service struct {
-	repo     *Repository
-	roomRepo *room.Repository
-}
-
-func NewService(repository *Repository, roomRepository *room.Repository) *Service {
+func NewService(repository BookingRepository, roomRepository RoomRepository) *Service {
 	return &Service{
 		repo:     repository,
 		roomRepo: roomRepository,
@@ -98,8 +109,8 @@ func validateParams(RoomID int64, input CheckInInput) (*Booking, error) {
 	}, nil
 }
 
-func validateRoom(RoomID int64, roomRepo *room.Repository, ctx context.Context) error {
-	room, err := roomRepo.FindByID(ctx, RoomID)
+func validateRoom(RoomID int64, r RoomRepository, ctx context.Context) error {
+	room, err := r.FindByID(ctx, RoomID)
 	if room == nil || err != nil {
 		return RoomNotFound
 	}
@@ -107,7 +118,7 @@ func validateRoom(RoomID int64, roomRepo *room.Repository, ctx context.Context) 
 	return nil
 }
 
-func isBookingAvailable(RoomID int64, r *Repository, ctx context.Context) (bool, error) {
+func isBookingAvailable(RoomID int64, r BookingRepository, ctx context.Context) (bool, error) {
 	isAvailable, err := r.IsBookingAvailable(ctx, RoomID)
 	if err != nil {
 		return false, err
@@ -116,8 +127,8 @@ func isBookingAvailable(RoomID int64, r *Repository, ctx context.Context) (bool,
 	return isAvailable, nil
 }
 
-func validateCheckOutDate(checkOut time.Time, RoomID int64, r *Repository, ctx context.Context) error {
-	b, err := r.getInProgressBooking(ctx, RoomID)
+func validateCheckOutDate(checkOut time.Time, RoomID int64, r BookingRepository, ctx context.Context) error {
+	b, err := r.GetInProgressBooking(ctx, RoomID)
 	if err != nil {
 		return err
 	}
