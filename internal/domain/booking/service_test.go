@@ -184,6 +184,9 @@ func TestCheckOut_Suite(t *testing.T) {
 				checkInTime, _ := time.Parse("2006-01-02", "2026-07-15")
 				return &Booking{RoomID: RoomID, CheckInDate: checkInTime}, nil
 			},
+			onIsBookingAvailable: func(ctx context.Context, RoomID int64) (bool, error) {
+				return false, nil
+			},
 		}
 
 		service := NewService(bookingMock, roomMock)
