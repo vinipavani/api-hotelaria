@@ -75,14 +75,14 @@ func buildList(dbRows pgx.Rows) ([]*Hotel, error) {
 	hotels := []*Hotel{}
 
 	for dbRows.Next() {
-		var h *Hotel
+		var h Hotel
 
-		err := scanHotelRow(dbRows, h)
+		err := scanHotelRow(dbRows, &h)
 		if err != nil {
 			return nil, err
 		}
 
-		hotels = append(hotels, h)
+		hotels = append(hotels, &h)
 	}
 
 	return hotels, nil
