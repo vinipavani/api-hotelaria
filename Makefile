@@ -1,5 +1,5 @@
 run:
-	docker compose up --build
+	docker compose up --build db api
 
 stop:
 	docker compose down
@@ -10,7 +10,7 @@ setup:
 	docker compose exec api go mod init api-hotelaria || true
 	docker compose exec api go mod download
 	docker compose exec api air init || true
-	docker compose down
+	@make stop
 	@make db-migrate
 	@make seed
 	@echo "🚀 Setup concluído com sucesso! Agora basta rodar 'make run' para iniciar."
@@ -19,8 +19,11 @@ seed:
 	docker compose run --rm api go run cmd/seed/main.go
 
 test:
-	@echo "🧪 Executando a suíte de testes unitários dentro do contêiner..."
+	@echo "🧪 Executando a suíte de testes unitários e de integração no banco isolado..."
+	docker compose up -d db_test
+	@sleep 3
 	docker compose run --rm api go test -v ./...
+	docker compose stop db_test
 
 .PHONY: clean - clear database and remove containers
 clean:

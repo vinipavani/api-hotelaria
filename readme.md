@@ -52,10 +52,13 @@ make run
 ## 🎛️ Painel de Controle (Comandos Disponíveis)
 O projeto utiliza um `Makefile` para resumir operações longas do Docker em comandos simples:
 
-- `make setup` - Realiza a primeira carga das imagens, instala bibliotecas Go e cria o ambiente.
-- `make seed` - Popula banco de dados, com dados fakes para testes.
+- `make setup` - Realiza a primeira carga das imagens, instala bibliotecas Go e aplica automaticamente as migrações iniciais de tabelas + seed.
+- `make seed` - Popula o banco de dados com uma carga realista de 5 hotéis e 100 quartos via Factory.
 - `make run` - Sobe os containers da API e do Banco exibindo os logs em tempo real.
-- `make test` - Inicia suíte de testes da aplicação.
+- `make test` - Inicializa uma instância paralela (`db_test`), ergue as tabelas via script Go nativo e executa toda a suíte de testes unitários e de integração de forma 100% isolada.
+- `make db-migrate` - Varre o diretório virtual do Go (`embed`) e aplica novas tabelas ou colunas criadas no banco de desenvolvimento.
+- `make db-rollback` - Desfaz o histórico de alterações do banco. Aceita o parâmetro dinâmico `steps` (Ex: `make db-rollback steps=3`).
+- `make create-migration` - Gera um par sequencial de arquivos `.up.sql` e `.down.sql` na pasta de migrações (Ex: `make create-migration name=add_document`).
 - `make stop` - Pausa os containers liberando a memória RAM do Linux, mas mantém todos os dados salvos.
 - `make clean` - Remove permanentemente os containers e apaga os dados/volumes do PostgreSQL (útil para resets).
 
