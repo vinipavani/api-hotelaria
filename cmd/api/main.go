@@ -1,15 +1,13 @@
 package main
 
 import (
-	"api-hotelaria/internal/config"
 	"api-hotelaria/internal/database"
 	"api-hotelaria/internal/server"
 	"log"
 )
 
 func main() {
-	config.LoadConfig()
-	database.ConnectDB(config.Env.DatabaseURL)
+	database.ConnectDB()
 
 	defer database.CloseDB()
 

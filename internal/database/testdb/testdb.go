@@ -1,7 +1,6 @@
 package testdb
 
 import (
-	"api-hotelaria/internal/config"
 	"api-hotelaria/internal/database"
 	"log"
 	"testing"
@@ -10,8 +9,7 @@ import (
 )
 
 func SetupIntegrationTests(m *testing.M) int {
-	config.LoadConfig()
-	database.ConnectDB(config.Env.TestDatabaseURL)
+	database.ConnectDB()
 
 	migration := database.MigrationInstance()
 

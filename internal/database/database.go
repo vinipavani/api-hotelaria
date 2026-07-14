@@ -1,6 +1,7 @@
 package database
 
 import (
+	"api-hotelaria/internal/config"
 	"api-hotelaria/internal/database/migrations"
 	"context"
 	"log"
@@ -17,8 +18,9 @@ import (
 
 var DB *pgxpool.Pool
 
-func ConnectDB(databaseURL string) {
-	dbConfig, err := pgxpool.ParseConfig(databaseURL)
+func ConnectDB() {
+	config.LoadEnv()
+	dbConfig, err := pgxpool.ParseConfig(config.Env.DatabaseURL)
 	if err != nil {
 		log.Fatalf("Erro ao processar a string de conexão do banco: %v\n", err)
 	}

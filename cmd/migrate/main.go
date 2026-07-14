@@ -1,7 +1,6 @@
 package main
 
 import (
-	"api-hotelaria/internal/config"
 	"api-hotelaria/internal/database"
 	"log"
 	"os"
@@ -12,9 +11,8 @@ import (
 
 func main() {
 	action := os.Args[1]
-	config.LoadConfig()
 	log.Println("🔌 Conectando ao banco de dados para gerenciar migrações administrativas...")
-	database.ConnectDB(config.Env.DatabaseURL)
+	database.ConnectDB()
 	defer database.CloseDB()
 
 	migration := database.MigrationInstance()

@@ -3,27 +3,31 @@ package config
 import (
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
 type Config struct {
-	Port            string
-	DatabaseURL     string
-	TestDatabaseURL string
+	Port        string
+	DatabaseURL string
 }
 
 var Env *Config
 
-func LoadConfig() {
+func LoadEnv() {
 	port := getEnvVariable("PORT", "8080")
-	databaseURL := getEnvVariable("DATABASE_URL", "")
-	TestDatabaseURL := getEnvVariable("TEST_DATABASE_URL", "")
+
+	var databaseURL string
+	if isTestEnvironment() {
+		databaseURL = getEnvVariable("TEST_DATABASE_URL", "")
+	} else {
+		databaseURL = getEnvVariable("DATABASE_URL", "")
+	}
 
 	Env = &Config{
-		Port:            port,
-		DatabaseURL:     databaseURL,
-		TestDatabaseURL: TestDatabaseURL,
+		Port:        port,
+		DatabaseURL: databaseURL,
 	}
 }
 
@@ -37,4 +41,13 @@ func getEnvVariable(key string, defaultValue string) string {
 	}
 
 	return variable
+}
+
+func isTestEnvironment() bool {
+	for _, arg := range os.Args {
+		if strings.HasPrefix(arg, "-test.") || strings.Contains(arg, "test") {
+			return true
+		}
+	}
+	return false
 }
