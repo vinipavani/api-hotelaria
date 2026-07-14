@@ -153,7 +153,6 @@ curl -i -X POST http://localhost:8080/hotels/1/rooms \
   "type": "suite",
   "capacity": 4,
   "per_night_value": 350,
-  "available": true,
   "created_at": "2026-07-12T15:05:00Z"
 }
 ```
