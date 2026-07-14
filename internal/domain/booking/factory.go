@@ -15,13 +15,13 @@ func CreateTestBooking(ctx context.Context, db *pgxpool.Pool, roomID int64, name
 	`
 
 	checkInTime := time.Now().Truncate(time.Second)
-	var b *Booking
+	var b Booking
 
 	row := db.QueryRow(ctx, query, roomID, name, doc, checkInTime, status)
-	err := scanBookingRow(row, b)
+	err := scanBookingRow(row, &b)
 	if err != nil {
 		return nil, err
 	}
 
-	return b, nil
+	return &b, nil
 }

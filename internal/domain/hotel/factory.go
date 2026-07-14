@@ -13,12 +13,12 @@ func CreateTestHotel(ctx context.Context, db *pgxpool.Pool, name, city string) (
 		RETURNING id, name, city, created_at;
 	`
 
-	var h *Hotel
+	var h Hotel
 	row := db.QueryRow(ctx, query, name, city)
-	err := scanHotelRow(row, h)
+	err := scanHotelRow(row, &h)
 	if err != nil {
 		return nil, err
 	}
 
-	return h, nil
+	return &h, nil
 }
