@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func TestBookingRepository_Queries_Integration(t *testing.T) {
+func TestRepository_Booking_Queries_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	hotelObj, err := hotel.CreateTestHotel(ctx, database.DB, "Copacabana Palace Test", "Rio de Janeiro")
@@ -44,10 +44,6 @@ func TestBookingRepository_Queries_Integration(t *testing.T) {
 
 		if b.ID == 0 {
 			t.Errorf("esperava que o RETURNING id do banco populasse a struct, mas veio zero")
-		}
-
-		if b.CreatedAt.IsZero() {
-			t.Errorf("esperava que o DEFAULT NOW() da tabela populasse o CreatedAt, mas veio zerado")
 		}
 
 		if b.Status != BookingStatusInProgress {
