@@ -30,8 +30,9 @@ cp .env.example .env
 ```
 Abra o arquivo `.env` gerado e certifique-se de que as credenciais do banco estejam configuradas para o ambiente Docker:
 ```env
-PORT=8080
 DATABASE_URL=postgres://postgres:postgres@db:5432/api_db?sslmode=disable
+TEST_DATABASE_URL=postgres://postgres:postgres@db_test:5432/test_db?sslmode=disable
+PORT="8080"
 ```
 
 ### 3. Executar o Setup Inicial (Apenas na primeira vez)
