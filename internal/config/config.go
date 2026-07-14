@@ -1,14 +1,16 @@
 package config
 
-import(
+import (
 	"log"
 	"os"
+
 	_ "github.com/joho/godotenv/autoload"
 )
 
 type Config struct {
-	Port        string
-	DatabaseURL string
+	Port            string
+	DatabaseURL     string
+	TestDatabaseURL string
 }
 
 var Env *Config
@@ -16,10 +18,12 @@ var Env *Config
 func LoadConfig() {
 	port := getEnvVariable("PORT", "8080")
 	databaseURL := getEnvVariable("DATABASE_URL", "")
+	TestDatabaseURL := getEnvVariable("TEST_DATABASE_URL", "")
 
 	Env = &Config{
-		Port:        port,
-		DatabaseURL: databaseURL,
+		Port:            port,
+		DatabaseURL:     databaseURL,
+		TestDatabaseURL: TestDatabaseURL,
 	}
 }
 

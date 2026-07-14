@@ -14,7 +14,7 @@ func main() {
 	action := os.Args[1]
 	config.LoadConfig()
 	log.Println("🔌 Conectando ao banco de dados para gerenciar migrações administrativas...")
-	database.ConnectDB()
+	database.ConnectDB(config.Env.DatabaseURL)
 	defer database.CloseDB()
 
 	migration := database.MigrationInstance()

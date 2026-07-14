@@ -1,7 +1,6 @@
 package database
 
 import (
-	"api-hotelaria/internal/config"
 	"api-hotelaria/internal/database/migrations"
 	"context"
 	"log"
@@ -18,8 +17,8 @@ import (
 
 var DB *pgxpool.Pool
 
-func ConnectDB() {
-	dbConfig, err := pgxpool.ParseConfig(config.Env.DatabaseURL)
+func ConnectDB(databaseURL string) {
+	dbConfig, err := pgxpool.ParseConfig(databaseURL)
 	if err != nil {
 		log.Fatalf("Erro ao processar a string de conexão do banco: %v\n", err)
 	}
@@ -48,14 +47,6 @@ func CloseDB() {
 	}
 }
 
-func configDatabaseConnection(dbConfig *pgxpool.Config) *pgxpool.Config {
-	dbConfig.MaxConns = 10
-	dbConfig.MinConns = 2
-	dbConfig.MaxConnIdleTime = time.Minute * 5 // Fecha conexões inativas após 5 minutos
-
-	return dbConfig
-}
-
 func MigrationInstance() *migrate.Migrate {
 	driver := createMigrationDriver()
 	sourceDriver := getMemorizedMigrations()
@@ -66,6 +57,14 @@ func MigrationInstance() *migrate.Migrate {
 	}
 
 	return migration
+}
+
+func configDatabaseConnection(dbConfig *pgxpool.Config) *pgxpool.Config {
+	dbConfig.MaxConns = 10
+	dbConfig.MinConns = 2
+	dbConfig.MaxConnIdleTime = time.Minute * 5 // Fecha conexões inativas após 5 minutos
+
+	return dbConfig
 }
 
 func checkMigrationsStatus() {
