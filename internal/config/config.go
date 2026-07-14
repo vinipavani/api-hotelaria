@@ -4,8 +4,6 @@ import (
 	"log"
 	"os"
 	"strings"
-
-	_ "github.com/joho/godotenv/autoload"
 )
 
 type Config struct {
